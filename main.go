@@ -5,10 +5,13 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 
 	"github.com/bwmarrin/discordgo"
 )
+
+const prefix = "!"
 
 // Variables used for command line params
 var (
@@ -22,15 +25,34 @@ func init() {
 	flag.Parse()
 }
 
+// Handles any message being created in the guild, parses them,
+// and sends them to the commands module.
 func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
+
+	fmt.Println("meow")
+
+	// Exit function if the message was created by a bot
 	if m.Author.Bot {
 		return
 	}
+
+	// Do nothing if prefix is not present
+	if !strings.HasPrefix(m.Content, prefix) {
+		return
+	}
+
+	// Parse the command by trimming the prefix
+	parseCommand(s, m, strings.TrimPrefix(m.Content, prefix))
+
+	// Log some details
 	fmt.Println("Message received!\nAuthor: " + m.Author.Username + "\nMessage: " + m.Message.Content)
-	_, err := s.ChannelMessageSend(m.ChannelID, "bitch")
+
+	// Legacy code calling people a bitch
+
+	/*_, err := s.ChannelMessageSend(m.ChannelID, "bitch")
 	if err != nil {
 		fmt.Println(err)
-	}
+	}*/
 }
 
 func main() {
@@ -55,11 +77,11 @@ func main() {
 		panic(err)
 	}
 
+	defer dg.Close()
+
 	// Listen until signal is received to end.
 	fmt.Println("Caramel Bot is running. Press CTRL-C to exit.")
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
 	<-sc
-
-	dg.Close()
 }
