@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"net/http"
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
@@ -10,6 +12,10 @@ import (
 var (
 	commands = make(map[string]Command)
 )
+
+type Compliment struct {
+	Compliment string
+}
 
 type Command struct {
 	Name string
@@ -25,6 +31,13 @@ func init() {
 		Exec: bitch,
 	}
 	commands["bitch"] = bitch
+
+	compliment := Command{
+		Name: "compliment",
+		Help: "Used to compliment somebody",
+		Exec: compliment,
+	}
+	commands["compliment"] = compliment
 }
 
 func parseCommand(s *discordgo.Session, m *discordgo.MessageCreate, message string) {
@@ -49,20 +62,50 @@ func parseCommand(s *discordgo.Session, m *discordgo.MessageCreate, message stri
 
 // Command to call someone a bitch
 func bitch(s *discordgo.Session, m *discordgo.MessageCreate, messageList []string) {
-	if len(m.Mentions) == 0 {
-		return
-	}
 
+	// If owner is mentioned, insult the sender
 	if m.Mentions[0].ID == "246732655373189120" {
 		s.ChannelMessageSend(m.ChannelID, "<@"+m.Author.ID+"> bitch")
 		return
 	}
 
+	// Logging
 	fmt.Println(messageList)
 	fmt.Println(m.Mentions[0].ID)
+
+	// If no one was tagged, send a general "bitch" out into the world
 	if len(messageList) == 1 {
 		s.ChannelMessageSend(m.ChannelID, "bitch")
-	} else {
+	} else if len(m.Mentions) > 0 {
+		// else if someone was tagged, tag that person and call them a "bitch"
 		s.ChannelMessageSend(m.ChannelID, "<@"+m.Mentions[0].ID+"> bitch")
+	}
+}
+
+func compliment(s *discordgo.Session, m *discordgo.MessageCreate, messageList []string) {
+	const URI = "https://complimentr.com/api"
+
+	if len(m.Mentions) == 0 {
+		return
+	}
+
+	response, err := http.Get(URI)
+	if err != nil {
+		fmt.Println("Error contacting Compliment API server")
+		return
+	}
+
+	defer response.Body.Close()
+
+	var body Compliment
+
+	err = json.NewDecoder(response.Body).Decode(&body)
+	if err != nil {
+		fmt.Println("Error decoding JSON")
+		return
+	}
+
+	if len(m.Mentions) > 0 {
+		s.ChannelMessageSend(m.ChannelID, "<@"+m.Mentions[0].ID+"> "+body.Compliment)
 	}
 }
