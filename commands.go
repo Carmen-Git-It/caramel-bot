@@ -64,14 +64,10 @@ func parseCommand(s *discordgo.Session, m *discordgo.MessageCreate, message stri
 func bitch(s *discordgo.Session, m *discordgo.MessageCreate, messageList []string) {
 
 	// If owner is mentioned, insult the sender
-	if m.Mentions[0].ID == "246732655373189120" {
+	if len(m.Mentions) > 0 && m.Mentions[0].ID == "246732655373189120" {
 		s.ChannelMessageSend(m.ChannelID, "<@"+m.Author.ID+"> bitch")
 		return
 	}
-
-	// Logging
-	fmt.Println(messageList)
-	fmt.Println(m.Mentions[0].ID)
 
 	// If no one was tagged, send a general "bitch" out into the world
 	if len(messageList) == 1 {
