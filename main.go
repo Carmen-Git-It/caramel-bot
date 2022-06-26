@@ -29,8 +29,6 @@ func init() {
 // and sends them to the commands module.
 func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 
-	fmt.Println("meow")
-
 	// Exit function if the message was created by a bot
 	if m.Author.Bot {
 		return
