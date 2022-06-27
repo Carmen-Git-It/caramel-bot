@@ -118,13 +118,15 @@ func addHandlers(dg *discordgo.Session, i *discordgo.InteractionCreate) {
 func registerCommands(dg *discordgo.Session) {
 	fmt.Println("Registering commands...")
 	registeredCommands := make([]*discordgo.ApplicationCommand, len(Commands))
-	for i, v := range Commands {
-		command, err := dg.ApplicationCommandCreate(dg.State.User.ID, testGuildID, v)
-		if err != nil {
-			fmt.Println("Error! Cannot create command!")
-			fmt.Println(err)
+	for _, g := range dg.State.Guilds {
+		for i, v := range Commands {
+			command, err := dg.ApplicationCommandCreate(dg.State.User.ID, g.ID, v)
+			if err != nil {
+				fmt.Println("Error! Cannot create command!")
+				fmt.Println(err)
+			}
+			registeredCommands[i] = command
 		}
-		registeredCommands[i] = command
 	}
 
 }
