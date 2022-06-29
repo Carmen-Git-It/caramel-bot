@@ -76,7 +76,7 @@ func main() {
 		panic(err)
 	}
 
-	const registeredCommands = registerCommands(dg)
+	registerCommands(dg)
 
 	defer dg.Close()
 
@@ -85,4 +85,6 @@ func main() {
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
 	<-sc
+
+	removeCommands(dg)
 }

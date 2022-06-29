@@ -9,7 +9,8 @@ import (
 )
 
 const testGuildID = "985707181854826497"
-var registeredCommands = []*discordgo.ApplicationCommand;
+
+var registeredCommands []*discordgo.ApplicationCommand
 
 var Commands = []*discordgo.ApplicationCommand{
 	{
@@ -120,9 +121,9 @@ func addHandlers(dg *discordgo.Session, i *discordgo.InteractionCreate) {
 	})
 }
 
-func registerCommands(dg *discordgo.Session) (registeredCommands []*discordgo.ApplicationCommand) {
+func registerCommands(dg *discordgo.Session) {
 	fmt.Println("Registering commands...")
-	registeredCommands := make([]*discordgo.ApplicationCommand, len(Commands))
+	registeredCommands = make([]*discordgo.ApplicationCommand, len(Commands))
 	for _, g := range dg.State.Guilds {
 		for i, v := range Commands {
 			command, err := dg.ApplicationCommandCreate(dg.State.User.ID, g.ID, v)
@@ -133,11 +134,9 @@ func registerCommands(dg *discordgo.Session) (registeredCommands []*discordgo.Ap
 			registeredCommands[i] = command
 		}
 	}
-
-	return registeredCommands;
 }
 
-func unregisterCommands(dg *discordgo.Session, registeredCommands []*discordgo.ApplicationCommand) {
+func removeCommands(dg *discordgo.Session) {
 	for _, g := range dg.State.Guilds {
 		for _, v := range registeredCommands {
 			err := dg.ApplicationCommandDelete(dg.State.User.ID, g.ID, v.ID)
@@ -147,5 +146,4 @@ func unregisterCommands(dg *discordgo.Session, registeredCommands []*discordgo.A
 			}
 		}
 	}
-	
 }
