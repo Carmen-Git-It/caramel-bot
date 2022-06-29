@@ -9,6 +9,7 @@ import (
 )
 
 const testGuildID = "985707181854826497"
+var registeredCommands = []*discordgo.ApplicationCommand;
 
 var Commands = []*discordgo.ApplicationCommand{
 	{
@@ -119,7 +120,7 @@ func addHandlers(dg *discordgo.Session, i *discordgo.InteractionCreate) {
 	})
 }
 
-func registerCommands(dg *discordgo.Session) {
+func registerCommands(dg *discordgo.Session) (registeredCommands []*discordgo.ApplicationCommand) {
 	fmt.Println("Registering commands...")
 	registeredCommands := make([]*discordgo.ApplicationCommand, len(Commands))
 	for _, g := range dg.State.Guilds {
@@ -133,4 +134,18 @@ func registerCommands(dg *discordgo.Session) {
 		}
 	}
 
+	return registeredCommands;
+}
+
+func unregisterCommands(dg *discordgo.Session, registeredCommands []*discordgo.ApplicationCommand) {
+	for _, g := range dg.State.Guilds {
+		for _, v := range registeredCommands {
+			err := dg.ApplicationCommandDelete(dg.State.User.ID, g.ID, v.ID)
+			if err != nil {
+				fmt.Println("Error! Cannot delete command!")
+				fmt.Println(err)
+			}
+		}
+	}
+	
 }

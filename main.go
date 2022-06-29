@@ -76,7 +76,7 @@ func main() {
 		panic(err)
 	}
 
-	registerCommands(dg)
+	const registeredCommands = registerCommands(dg)
 
 	defer dg.Close()
 
