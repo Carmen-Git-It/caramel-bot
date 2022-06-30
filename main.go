@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"os"
 	"os/signal"
@@ -9,6 +8,7 @@ import (
 	"syscall"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/joho/godotenv"
 )
 
 const prefix = "!"
@@ -21,8 +21,16 @@ var (
 // Parse arguments
 func init() {
 	// Accept the Discord bot token from the command line
-	flag.StringVar(&Token, "t", "", "Bot Token")
-	flag.Parse()
+	// flag.StringVar(&Token, "t", "", "Bot Token")
+	// flag.Parse()
+
+	// Load the .env file
+	err := godotenv.Load("token.env")
+	if err != nil {
+		fmt.Println("Error loading .env file")
+		panic(err)
+	}
+	Token = os.Getenv("TOKEN")
 }
 
 // Handles any message being created in the guild, parses them,
@@ -83,7 +91,7 @@ func main() {
 	// Listen until signal is received to end.
 	fmt.Println("Caramel Bot is running. Press CTRL-C to exit.")
 	sc := make(chan os.Signal, 1)
-	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
+	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
 	<-sc
 
 	removeCommands(dg)
