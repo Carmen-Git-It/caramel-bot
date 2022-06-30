@@ -35,6 +35,11 @@ var Commands = []*discordgo.ApplicationCommand{
 			},
 		},
 	},
+	{
+		Name:        "trivia",
+		Description: "Generate a trivia question",
+		// TODO add options?
+	},
 }
 
 var CommandHandlers = map[string]func(dg *discordgo.Session, i *discordgo.InteractionCreate){
@@ -106,6 +111,11 @@ var CommandHandlers = map[string]func(dg *discordgo.Session, i *discordgo.Intera
 			fmt.Println("Error with function bitch:")
 			fmt.Println(err)
 		}
+	},
+	"trivia": func(dg *discordgo.Session, i *discordgo.InteractionCreate) {
+		const BASEURI = "https://opentdb.com/api.php?"
+		categories := [24]string{"Sports", "Geography", "History", "Politics", "Art", "Celebrities", "Animals", "Vehicles", "Entertainment: Comics", "Science: Gadgets", "Entertainment: Japanese Anime & Manga", "Entertainment: Cartoon & Animations", "General Knowledge", "Entertainment: Books", "Entertainment: Film", "Entertainment: Music", "Entertainment: Musicals & Theatres", "Entertainment: Television", "Entertainment: Video Games", "Entertainment: Board Games", "Science & Nature", "Science: Computers", "Science: Mathematics", "Mythology"}
+
 	},
 }
 
