@@ -52,13 +52,6 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	// Log some details
 	fmt.Println("Message received!\nAuthor: " + m.Author.Username + "\nMessage: " + m.Message.Content)
-
-	// Legacy code calling people a bitch
-
-	/*_, err := s.ChannelMessageSend(m.ChannelID, "bitch")
-	if err != nil {
-		fmt.Println(err)
-	}*/
 }
 
 func main() {
