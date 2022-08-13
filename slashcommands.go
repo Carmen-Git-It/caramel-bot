@@ -8,8 +8,6 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-const testGuildID = "985707181854826497"
-
 var registeredCommands []*discordgo.ApplicationCommand
 
 var Commands = []*discordgo.ApplicationCommand{
