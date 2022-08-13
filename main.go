@@ -84,6 +84,10 @@ func main() {
 	// Listen until signal is received to end.
 	fmt.Println("Caramel Bot is running. Press CTRL-C to exit.")
 	sc := make(chan os.Signal, 1)
+
+	//Testing logic, remove later
+	ScrapeProfessor("Asad Norouzi")
+
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
 	<-sc
 

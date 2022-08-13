@@ -35,6 +35,18 @@ var Commands = []*discordgo.ApplicationCommand{
 			},
 		},
 	},
+	{
+		Name:        "rmp",
+		Description: "Query a professor's rating on RateMyProf.",
+		Options: []*discordgo.ApplicationCommandOption{
+			{
+				Name:        "professor",
+				Description: "The professor you would like to look up",
+				Type:        discordgo.ApplicationCommandOptionString,
+				Required:    true,
+			},
+		},
+	},
 }
 
 var CommandHandlers = map[string]func(dg *discordgo.Session, i *discordgo.InteractionCreate){
@@ -106,6 +118,16 @@ var CommandHandlers = map[string]func(dg *discordgo.Session, i *discordgo.Intera
 			fmt.Println("Error with function bitch:")
 			fmt.Println(err)
 		}
+	},
+	"rmp": func(dg *discordgo.Session, i *discordgo.InteractionCreate) {
+		//var message = ""
+
+		options := i.ApplicationCommandData().Options
+
+		if options[0] != nil {
+			ScrapeProfessor(options[0].StringValue())
+		}
+
 	},
 }
 
