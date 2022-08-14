@@ -110,6 +110,11 @@ func QueryProfessor(professor string) (RMPResult, error) {
 		return result, errors.New("Error decoding JSON")
 	}
 
+	// If no professors were found, return an error
+	if professorBody.SearchResultsTotal == 0 {
+		return result, errors.New("Professor not found")
+	}
+
 	fmt.Println("Found ", professorBody.SearchResultsTotal, " results")
 	fmt.Println("First professor found: ", professorBody.Professors[0].TFname, professorBody.Professors[0].TMiddleName, professorBody.Professors[0].TLname)
 
@@ -189,15 +194,19 @@ func QueryProfessor(professor string) (RMPResult, error) {
 		page++
 		ratingQuery = fmt.Sprint("https://www.ratemyprofessors.com/paginate/professors/ratings?tid=", professorBody.Professors[0].TId, "&filter=&courseCode=&page=", page)
 
-		// Incorporate ratings into result
-		for _, rating := range ratingBody.Ratings {
-			// Ignore rating if not helpful AND a 1.0 rating (not sure why, seems fucked up tbh)
-			result.ratingDistribution[int(math.Ceil(rating.ROverall))]++
-			if result.numRatingsByCourse[rating.RClass] == 0 {
-				result.courses = append(result.courses, rating.RClass)
+		if len(ratingBody.Ratings) > 0 {
+			// Incorporate ratings into result
+			for _, rating := range ratingBody.Ratings {
+				// Ignore rating if not helpful AND a 1.0 rating (not sure why, seems fucked up tbh)
+				result.ratingDistribution[int(math.Ceil(rating.ROverall))]++
+				if result.numRatingsByCourse[rating.RClass] == 0 {
+					result.courses = append(result.courses, rating.RClass)
+				}
+				result.totalRatingByCourse[rating.RClass] += float64(rating.RClarity) + float64(rating.RHelpful)
+				result.numRatingsByCourse[rating.RClass] += 2
 			}
-			result.totalRatingByCourse[rating.RClass] += float64(rating.RClarity) + float64(rating.RHelpful)
-			result.numRatingsByCourse[rating.RClass] += 2
+		} else {
+			return result, errors.New("No ratings found")
 		}
 	}
 

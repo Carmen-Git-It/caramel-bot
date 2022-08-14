@@ -129,6 +129,18 @@ var CommandHandlers = map[string]func(dg *discordgo.Session, i *discordgo.Intera
 			if err != nil {
 				fmt.Println("Error querying the professor given, please try another professor name")
 				fmt.Println(err)
+				message = "**ERROR**: Professor not found, please try again."
+				err = dg.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+					Type: discordgo.InteractionResponseChannelMessageWithSource,
+					Data: &discordgo.InteractionResponseData{
+						Content: message,
+					},
+				})
+
+				if err != nil {
+					fmt.Println("Error with function rmp")
+					fmt.Println(err)
+				}
 			} else {
 				message = "Results for " + rmp.professorName + "...\n\n" +
 					"Overall rating: " + rmp.totalRating + "/5 with " + rmp.numRatings + "\n\n" +
