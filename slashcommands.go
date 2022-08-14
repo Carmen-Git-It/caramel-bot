@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -157,9 +158,30 @@ var CommandHandlers = map[string]func(dg *discordgo.Session, i *discordgo.Intera
 					message = fmt.Sprintf("%s%s%s%.2f%s%d%s", message, course, ": ", rmp.totalRatingByCourse[course], "/5 from ", rmp.numRatingsByCourse[course], " reviews\n")
 				}
 
+				embed := &discordgo.MessageEmbed{
+					Author:      &discordgo.MessageEmbedAuthor{},
+					Color:       0x00ff00,
+					Description: "Results for " + rmp.professorName + "...\n\n",
+					Fields: []*discordgo.MessageEmbedField{
+						&discordgo.MessageEmbedField{
+							Name:   "Overall rating",
+							Value:  rmp.totalRating,
+							Inline: false,
+						},
+						&discordgo.MessageEmbedField{
+							Name:   "Rating Distribution",
+							Value:  fmt.Sprint("5: ", rmp.ratingDistribution[5], "s"),
+							Inline: false,
+						},
+					},
+					Timestamp: time.Now().Format(time.RFC3339),
+					Title:     "Results for " + rmp.professorName,
+				}
+
 				err = dg.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 					Type: discordgo.InteractionResponseChannelMessageWithSource,
 					Data: &discordgo.InteractionResponseData{
+						Embeds:  []*discordgo.MessageEmbed{embed},
 						Content: message,
 					},
 				})

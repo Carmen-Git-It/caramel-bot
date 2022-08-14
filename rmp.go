@@ -159,7 +159,7 @@ func QueryProfessor(professor string) (RMPResult, error) {
 	var ratingQuery = fmt.Sprint("https://www.ratemyprofessors.com/paginate/professors/ratings?tid=", professorBody.Professors[0].TId, "&filter=&courseCode=&page=", page)
 
 	// Start building result
-	result.professorName = professorBody.Professors[0].TFname + " " + professorBody.Professors[0].TMiddleName + " " + professorBody.Professors[0].TLname
+	result.professorName = professorBody.Professors[0].TFname + " " + professorBody.Professors[0].TLname
 	result.numRatingsByCourse = make(map[string]int)
 	result.totalRatingByCourse = make(map[string]float64)
 
