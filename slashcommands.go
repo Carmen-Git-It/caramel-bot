@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/bwmarrin/discordgo"
@@ -157,6 +158,10 @@ var CommandHandlers = map[string]func(dg *discordgo.Session, i *discordgo.Intera
 				for _, course := range rmp.courses {
 					message = fmt.Sprintf("%s%s%s%.2f%s%d%s", message, course, ": ", rmp.totalRatingByCourse[course], "/5 from ", rmp.numRatingsByCourse[course], " reviews\n")
 				}
+				fmt.Println(strings.Split(rmp.numRatings, " ")[0])
+
+				var imageUrl string = fmt.Sprint("https://image-charts.com/chart?cht=bvg&chbr=10&chd=t:", rmp.ratingDistribution[1], ",", rmp.ratingDistribution[2], ",", rmp.ratingDistribution[3], ",", rmp.ratingDistribution[4], ",", rmp.ratingDistribution[5], "&chxr=0,1,6,1&chxt=x,y&chs=500x400&chdls=000000,18&chtt=Rating+Distrbution")
+				fmt.Println(imageUrl)
 
 				embed := &discordgo.MessageEmbed{
 					Author:      &discordgo.MessageEmbedAuthor{},
@@ -175,7 +180,10 @@ var CommandHandlers = map[string]func(dg *discordgo.Session, i *discordgo.Intera
 						},
 					},
 					Timestamp: time.Now().Format(time.RFC3339),
-					Title:     "Results for " + rmp.professorName,
+					Title:     "Rate My Professor Query",
+					Image: &discordgo.MessageEmbedImage{
+						URL: imageUrl,
+					},
 				}
 
 				err = dg.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
