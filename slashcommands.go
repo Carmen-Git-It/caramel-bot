@@ -120,12 +120,43 @@ var CommandHandlers = map[string]func(dg *discordgo.Session, i *discordgo.Intera
 		}
 	},
 	"rmp": func(dg *discordgo.Session, i *discordgo.InteractionCreate) {
-		//var message = ""
+		var message = ""
 
 		options := i.ApplicationCommandData().Options
 
 		if options[0] != nil {
-			QueryProfessor(options[0].StringValue())
+			rmp, err := QueryProfessor(options[0].StringValue())
+			if err != nil {
+				fmt.Println("Error querying the professor given, please try another professor name")
+				fmt.Println(err)
+			} else {
+				message = "Results for " + rmp.professorName + "...\n\n" +
+					"Overall rating: " + rmp.totalRating + "/5 with " + rmp.numRatings + "\n\n" +
+					"Rating Distribution:\n"
+
+				for i := 5; i > 0; i-- {
+					message = fmt.Sprint(message, rmp.ratingDistribution[i], " ", i, "s\n")
+				}
+
+				message += "\nWould take it again: " + rmp.wouldTakeAgain + "\n\n"
+				message += "Difficulty: " + rmp.levelOfDifficulty + "/5\n\n"
+				message += "Average Rating by Course:\n"
+				for _, course := range rmp.courses {
+					message = fmt.Sprintf("%s%s%s%.2f%s%d%s", message, course, ": ", rmp.totalRatingByCourse[course], "/5 from ", rmp.numRatingsByCourse[course], " reviews\n")
+				}
+
+				err = dg.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+					Type: discordgo.InteractionResponseChannelMessageWithSource,
+					Data: &discordgo.InteractionResponseData{
+						Content: message,
+					},
+				})
+
+				if err != nil {
+					fmt.Println("Error with function rmp")
+					fmt.Println(err)
+				}
+			}
 		}
 
 	},
