@@ -86,7 +86,7 @@ func main() {
 	sc := make(chan os.Signal, 1)
 
 	//Testing logic, remove later
-	ScrapeProfessor("Asad Norouzi")
+	QueryProfessor("Fardad Soleimanloo")
 
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
 	<-sc

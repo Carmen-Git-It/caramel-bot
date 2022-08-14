@@ -125,7 +125,7 @@ var CommandHandlers = map[string]func(dg *discordgo.Session, i *discordgo.Intera
 		options := i.ApplicationCommandData().Options
 
 		if options[0] != nil {
-			ScrapeProfessor(options[0].StringValue())
+			QueryProfessor(options[0].StringValue())
 		}
 
 	},
