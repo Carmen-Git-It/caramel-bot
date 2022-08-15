@@ -1,4 +1,4 @@
-package main
+package commands
 
 import (
 	"encoding/json"
@@ -10,7 +10,6 @@ import (
 	"strings"
 
 	"github.com/gocolly/colly"
-	// "github.com/gocolly/colly"
 )
 
 type ProfessorQueryResult struct {
@@ -98,7 +97,7 @@ func QueryProfessor(professor string) (RMPResult, error) {
 	if err != nil {
 		fmt.Println("Error contacting RateMyProfessors API server")
 		fmt.Println(err)
-		return result, errors.New("Error contacting RateMyProfessors API server")
+		return result, errors.New("error contacting RateMyProfessors API server")
 	}
 	defer professorResponse.Body.Close()
 
@@ -108,7 +107,7 @@ func QueryProfessor(professor string) (RMPResult, error) {
 	err = json.NewDecoder(professorResponse.Body).Decode(&professorBody)
 	if err != nil {
 		fmt.Println("Error decoding JSON")
-		return result, errors.New("Error decoding JSON")
+		return result, errors.New("error decoding JSON")
 	}
 
 	// If no professors were found, return an error
@@ -183,7 +182,7 @@ func QueryProfessor(professor string) (RMPResult, error) {
 		if err != nil {
 			fmt.Println("Error contacting RateMyProfessors API server")
 			fmt.Println(err)
-			return result, errors.New("Error contacting RateMyProfessors API server")
+			return result, errors.New("error contacting RateMyProfessors API server")
 		}
 		defer ratingResponse.Body.Close()
 
@@ -193,7 +192,7 @@ func QueryProfessor(professor string) (RMPResult, error) {
 		if err != nil {
 			fmt.Println("Error decoding JSON")
 			fmt.Println(err)
-			return result, errors.New("Error decoding JSON")
+			return result, errors.New("error decoding JSON")
 		}
 
 		// Check remaining ratings
@@ -214,7 +213,7 @@ func QueryProfessor(professor string) (RMPResult, error) {
 				result.numRatingsByCourse[rating.RClass] += 2
 			}
 		} else {
-			return result, errors.New("No ratings found")
+			return result, errors.New("no ratings found")
 		}
 	}
 
@@ -224,6 +223,59 @@ func QueryProfessor(professor string) (RMPResult, error) {
 	}
 
 	return result, nil
+}
+
+func CompareOverallRating(rmp1, rmp2 RMPResult) string {
+	if rmp1.totalRating > rmp2.totalRating {
+		return rmp1.professorName + " has an overall rating of " + rmp1.totalRating + "/5" + " with " + rmp1.numRatings + " ratings"
+	} else if rmp1.totalRating < rmp2.totalRating {
+		return rmp2.professorName + " has an overall rating of " + rmp2.totalRating + "/5" + " with " + rmp2.numRatings + " ratings"
+	} else {
+		return "Both professors have an overall rating of " + rmp1.totalRating + "/5"
+	}
+}
+
+func CompareWouldTakeAgain(rmp1, rmp2 RMPResult) string {
+	if rmp1.wouldTakeAgain > rmp2.wouldTakeAgain {
+		return rmp1.professorName + " has " + rmp1.wouldTakeAgain + " who would take again"
+	} else if rmp1.wouldTakeAgain < rmp2.wouldTakeAgain {
+		return rmp2.professorName + " has " + rmp2.wouldTakeAgain + " who would take again"
+	} else {
+		return "Both professors have " + rmp1.wouldTakeAgain + " who would take again"
+	}
+}
+
+func CompareDifficulty(rmp1, rmp2 RMPResult) string {
+	if rmp1.levelOfDifficulty < rmp2.levelOfDifficulty {
+		return rmp1.professorName + " has a level of difficulty of " + rmp1.levelOfDifficulty
+	} else if rmp1.levelOfDifficulty > rmp2.levelOfDifficulty {
+		return rmp2.professorName + " has a level of difficulty of " + rmp2.levelOfDifficulty
+	} else {
+		return "Both professors have a level of difficulty of " + rmp1.levelOfDifficulty
+	}
+}
+
+func CompareBestByCourse(rmp1, rmp2 RMPResult) string {
+	var bestByCourse string = ""
+	for _, course := range rmp1.courses {
+		// If the course is in both professors' lists, compare ratings
+		if rmp2.numRatingsByCourse[course] > 0 {
+			bestByCourse += "**" + course + "**" + ": "
+			if rmp1.totalRatingByCourse[course] > rmp2.totalRatingByCourse[course] {
+				bestByCourse += fmt.Sprintf("%s%s%.2f%s%s%d%s", rmp1.professorName, " has a rating of ", rmp1.totalRatingByCourse[course], "/5\n", "with ", rmp1.numRatingsByCourse[course], " ratings\n")
+			} else if rmp1.totalRatingByCourse[course] < rmp2.totalRatingByCourse[course] {
+				bestByCourse += fmt.Sprintf("%s%s%.2f%s%s%d%s", rmp2.professorName, " has a rating of ", rmp1.totalRatingByCourse[course], "/5\n", "with ", rmp1.numRatingsByCourse[course], " ratings\n")
+			} else {
+				bestByCourse += fmt.Sprintf("%s%.2f%s", "Both professors have a rating of ", rmp1.totalRatingByCourse[course], "/5\n")
+			}
+		}
+	}
+
+	if bestByCourse == "" {
+		bestByCourse = "No courses found in common"
+	}
+
+	return bestByCourse
 }
 
 func stringSliceContains(slice []string, item string) bool {

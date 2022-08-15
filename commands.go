@@ -13,10 +13,6 @@ var (
 	commands = make(map[string]Command)
 )
 
-type Compliment struct {
-	Compliment string
-}
-
 type Command struct {
 	Name string
 	Help string
