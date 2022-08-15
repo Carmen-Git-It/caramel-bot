@@ -84,6 +84,7 @@ type RMPResult struct {
 	wouldTakeAgain      string
 	levelOfDifficulty   string
 	ratingDistribution  map[int]int
+	topTags             []string
 }
 
 func QueryProfessor(professor string) (RMPResult, error) {
@@ -128,6 +129,7 @@ func QueryProfessor(professor string) (RMPResult, error) {
 		colly.AllowedDomains("www.ratemyprofessors.com"),
 	)
 
+	// Scrape the overall rating, % who would take again, and level of difficulty
 	c.OnHTML("div[class]", func(e *colly.HTMLElement) {
 		if strings.Contains(e.Attr("class"), "RatingValue__Numerator") {
 			result.totalRating = e.Text
@@ -139,8 +141,14 @@ func QueryProfessor(professor string) (RMPResult, error) {
 				result.levelOfDifficulty = e.Text
 			}
 		}
+		if strings.Contains(e.Attr("class"), "TeacherTags__TagsContainer") {
+			e.ForEach("span", func(_ int, elem *colly.HTMLElement) {
+				result.topTags = append(result.topTags, elem.Text)
+			})
+		}
 	})
 
+	// Scrape the number o fratings
 	c.OnHTML("a[href]", func(e *colly.HTMLElement) {
 		if e.Attr("href") == "#ratingsList" {
 			result.numRatings = strings.Split(e.Text, " ")[0]

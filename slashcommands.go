@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/bwmarrin/discordgo"
@@ -122,8 +121,6 @@ var CommandHandlers = map[string]func(dg *discordgo.Session, i *discordgo.Intera
 		}
 	},
 	"rmp": func(dg *discordgo.Session, i *discordgo.InteractionCreate) {
-		var message = ""
-
 		options := i.ApplicationCommandData().Options
 
 		if options[0] != nil {
@@ -131,7 +128,7 @@ var CommandHandlers = map[string]func(dg *discordgo.Session, i *discordgo.Intera
 			if err != nil {
 				fmt.Println("Error querying the professor given, please try another professor name")
 				fmt.Println(err)
-				message = "**ERROR**: Professor not found, please try again."
+				var message = "**ERROR**: Professor not found, please try again."
 				err = dg.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 					Type: discordgo.InteractionResponseChannelMessageWithSource,
 					Data: &discordgo.InteractionResponseData{
@@ -144,45 +141,57 @@ var CommandHandlers = map[string]func(dg *discordgo.Session, i *discordgo.Intera
 					fmt.Println(err)
 				}
 			} else {
-				message = "Results for " + rmp.professorName + "...\n\n" +
-					"Overall rating: " + rmp.totalRating + "/5 with " + rmp.numRatings + "\n\n" +
-					"Rating Distribution:\n"
-
-				for i := 5; i > 0; i-- {
-					message = fmt.Sprint(message, rmp.ratingDistribution[i], " ", i, "s\n")
+				var ratingByCourse = ""
+				var topTags = ""
+				for _, tag := range rmp.topTags {
+					topTags += tag + ", "
 				}
-
-				message += "\nWould take it again: " + rmp.wouldTakeAgain + "\n\n"
-				message += "Difficulty: " + rmp.levelOfDifficulty + "/5\n\n"
-				message += "Average Rating by Course:\n"
 				for _, course := range rmp.courses {
-					message = fmt.Sprintf("%s%s%s%.2f%s%d%s", message, course, ": ", rmp.totalRatingByCourse[course], "/5 from ", rmp.numRatingsByCourse[course], " reviews\n")
+					ratingByCourse = fmt.Sprintf("%s%s%s%.2f%s%d%s", ratingByCourse, course, ": ", rmp.totalRatingByCourse[course], "/5 from ", rmp.numRatingsByCourse[course], " reviews\n")
 				}
-				fmt.Println(strings.Split(rmp.numRatings, " ")[0])
 
 				var imageUrl string = fmt.Sprint("https://image-charts.com/chart?cht=bvg&chbr=10&chd=t:", rmp.ratingDistribution[1], ",", rmp.ratingDistribution[2], ",", rmp.ratingDistribution[3], ",", rmp.ratingDistribution[4], ",", rmp.ratingDistribution[5], "&chxr=0,1,6,1&chxt=x,y&chs=500x400&chdls=000000,18&chtt=Rating+Distrbution")
-				fmt.Println(imageUrl)
+
+				// Testing code
+				fmt.Println("Top tags: ", rmp.topTags)
 
 				embed := &discordgo.MessageEmbed{
-					Author:      &discordgo.MessageEmbedAuthor{},
-					Color:       0x00ff00,
-					Description: "Results for " + rmp.professorName + "...\n\n",
+					Author: &discordgo.MessageEmbedAuthor{},
+					Color:  0x00ff00,
 					Fields: []*discordgo.MessageEmbedField{
 						&discordgo.MessageEmbedField{
 							Name:   "Overall rating",
-							Value:  rmp.totalRating,
+							Value:  rmp.totalRating + "/5",
+							Inline: true,
+						},
+						&discordgo.MessageEmbedField{
+							Name:   "Would Take Again",
+							Value:  rmp.wouldTakeAgain,
+							Inline: true,
+						},
+						&discordgo.MessageEmbedField{
+							Name:   "Difficulty",
+							Value:  rmp.levelOfDifficulty + "/5",
+							Inline: true,
+						},
+						&discordgo.MessageEmbedField{
+							Name:   "Top Tags",
+							Value:  topTags,
 							Inline: false,
 						},
 						&discordgo.MessageEmbedField{
-							Name:   "Rating Distribution",
-							Value:  fmt.Sprint("5: ", rmp.ratingDistribution[5], "s"),
+							Name:   "Average Rating by Course",
+							Value:  ratingByCourse,
 							Inline: false,
 						},
 					},
 					Timestamp: time.Now().Format(time.RFC3339),
-					Title:     "Rate My Professor Query",
+					Title:     rmp.professorName,
 					Image: &discordgo.MessageEmbedImage{
 						URL: imageUrl,
+					},
+					Footer: &discordgo.MessageEmbedFooter{
+						Text: "Powered by image-charts.com | Data retreived from RateMyProfessor.com",
 					},
 				}
 
@@ -190,7 +199,7 @@ var CommandHandlers = map[string]func(dg *discordgo.Session, i *discordgo.Intera
 					Type: discordgo.InteractionResponseChannelMessageWithSource,
 					Data: &discordgo.InteractionResponseData{
 						Embeds:  []*discordgo.MessageEmbed{embed},
-						Content: message,
+						Content: "",
 					},
 				})
 
