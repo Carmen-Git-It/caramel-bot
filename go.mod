@@ -1,4 +1,4 @@
-module github.com/Carmen-Git-It/caramel-bot
+module caramel-bot
 
 go 1.16
 

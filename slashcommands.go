@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 
+	c "caramel-bot/commands"
+
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -66,10 +68,10 @@ var Commands = []*discordgo.ApplicationCommand{
 }
 
 var CommandHandlers = map[string]func(dg *discordgo.Session, i *discordgo.InteractionCreate){
-	"compliment":  commands.CommandCompliment,
-	"bitch":       commands.CommandBitch,
-	"rmp":         commands.CommandRMP,
-	"rmp-compare": commands.CommandRMPCompare,
+	"compliment":  c.CommandCompliment,
+	"bitch":       c.CommandBitch,
+	"rmp":         c.CommandRMP,
+	"rmp-compare": c.CommandRMPCompare,
 }
 
 func addHandlers(dg *discordgo.Session, i *discordgo.InteractionCreate) {

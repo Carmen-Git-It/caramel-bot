@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"strings"
 
+	c "caramel-bot/commands"
+
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -89,7 +91,7 @@ func compliment(s *discordgo.Session, m *discordgo.MessageCreate, messageList []
 
 	defer response.Body.Close()
 
-	var body Compliment
+	var body c.Compliment
 
 	err = json.NewDecoder(response.Body).Decode(&body)
 	if err != nil {
