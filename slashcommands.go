@@ -38,11 +38,29 @@ var Commands = []*discordgo.ApplicationCommand{
 	},
 	{
 		Name:        "rmp",
-		Description: "Query a professor's rating on RateMyProf.",
+		Description: "Query RateMyProfessors for data on a professor",
 		Options: []*discordgo.ApplicationCommandOption{
 			{
 				Name:        "professor",
 				Description: "The professor you would like to look up",
+				Type:        discordgo.ApplicationCommandOptionString,
+				Required:    true,
+			},
+		},
+	},
+	{
+		Name:        "rmp-compare",
+		Description: "Compare two professors using data from RateMyProfessors",
+		Options: []*discordgo.ApplicationCommandOption{
+			{
+				Name:        "first-professor",
+				Description: "The first professor you would like to compare",
+				Type:        discordgo.ApplicationCommandOptionString,
+				Required:    true,
+			},
+			{
+				Name:        "second-professor",
+				Description: "The second professor that you would like to compare",
 				Type:        discordgo.ApplicationCommandOptionString,
 				Required:    true,
 			},
@@ -159,27 +177,27 @@ var CommandHandlers = map[string]func(dg *discordgo.Session, i *discordgo.Intera
 					Author: &discordgo.MessageEmbedAuthor{},
 					Color:  0x00ff00,
 					Fields: []*discordgo.MessageEmbedField{
-						&discordgo.MessageEmbedField{
+						{
 							Name:   "Overall rating",
 							Value:  rmp.totalRating + "/5",
 							Inline: true,
 						},
-						&discordgo.MessageEmbedField{
+						{
 							Name:   "Would Take Again",
 							Value:  rmp.wouldTakeAgain,
 							Inline: true,
 						},
-						&discordgo.MessageEmbedField{
+						{
 							Name:   "Difficulty",
 							Value:  rmp.levelOfDifficulty + "/5",
 							Inline: true,
 						},
-						&discordgo.MessageEmbedField{
+						{
 							Name:   "Top Tags",
 							Value:  topTags,
 							Inline: false,
 						},
-						&discordgo.MessageEmbedField{
+						{
 							Name:   "Average Rating by Course",
 							Value:  ratingByCourse,
 							Inline: false,
@@ -210,6 +228,94 @@ var CommandHandlers = map[string]func(dg *discordgo.Session, i *discordgo.Intera
 			}
 		}
 
+	},
+	"rmp-compare": func(dg *discordgo.Session, i *discordgo.InteractionCreate) {
+		options := i.ApplicationCommandData().Options
+
+		// Query both professors, return if error encountered
+		if options[0] != nil && options[1] != nil {
+			rmp1, err := QueryProfessor(options[0].StringValue())
+			if err != nil {
+				fmt.Println("Error querying the professor given, please try another professor name")
+				fmt.Println(err)
+				var message = "**ERROR**: Professor not found, please try again."
+				err = dg.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+					Type: discordgo.InteractionResponseChannelMessageWithSource,
+					Data: &discordgo.InteractionResponseData{
+						Content: message,
+					},
+				})
+
+				if err != nil {
+					fmt.Println("Error with function rmp-compare")
+					fmt.Println(err)
+					return
+				}
+			} else {
+				rmp2, err := QueryProfessor(options[1].StringValue())
+				if err != nil {
+					fmt.Println("Error querying the professor given, please try another professor name")
+					fmt.Println(err)
+					var message = "**ERROR**: Professor not found, please try again."
+					err = dg.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+						Type: discordgo.InteractionResponseChannelMessageWithSource,
+						Data: &discordgo.InteractionResponseData{
+							Content: message,
+						},
+					})
+
+					if err != nil {
+						fmt.Println("Error with function rmp-compare")
+						fmt.Println(err)
+						return
+					}
+				}
+
+				// Compose the message in markdown for formatting purposes
+
+				// Have both professors data, now compare them
+				embed := &discordgo.MessageEmbed{
+					Title:       "RateMyProfessor Comparison",
+					Description: fmt.Sprintf("%s and %s", rmp1.professorName, rmp2.professorName),
+					Fields: []*discordgo.MessageEmbedField{
+						{
+							Name:   "\u200B",
+							Value:  "```**Name**         :**" + rmp1.professorName + "**     " + "**" + rmp2.professorName + "**```",
+							Inline: false,
+						},
+						// // Line break
+						// {
+						// 	Name:   "\u200B",
+						// 	Value:  "\u200B",
+						// 	Inline: false,
+						// },
+						{
+							Name:   "\u200B",
+							Value:  "**Total Rating**:**" + rmp1.totalRating + "/5**     " + "**" + rmp2.totalRating + "/5**",
+							Inline: true,
+						},
+						// Line break
+						{
+							Name:   "\u200B",
+							Value:  "\u200B",
+							Inline: false,
+						},
+					},
+				}
+				err = dg.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+					Type: discordgo.InteractionResponseChannelMessageWithSource,
+					Data: &discordgo.InteractionResponseData{
+						Embeds:  []*discordgo.MessageEmbed{embed},
+						Content: "",
+					},
+				})
+
+				if err != nil {
+					fmt.Println("Error with function rmp-compare")
+					fmt.Println(err)
+				}
+			}
+		}
 	},
 }
 
