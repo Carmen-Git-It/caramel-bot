@@ -78,7 +78,7 @@ func CommandRMP(dg *discordgo.Session, i *discordgo.InteractionCreate) {
 					URL: imageUrl,
 				},
 				Footer: &discordgo.MessageEmbedFooter{
-					Text: "Powered by image-charts.com | Data retreived from RateMyProfessor.com",
+					Text: "Powered by image-charts.com | Data retreived from RateMyProfessors.com",
 				},
 			}
 

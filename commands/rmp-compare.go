@@ -53,6 +53,9 @@ func CommandRMPCompare(dg *discordgo.Session, i *discordgo.InteractionCreate) {
 				Title:       "RateMyProfessor Comparison",
 				Description: "[" + rmp1.professorName + "](" + rmp1.rmpURL + ")" + " vs " + "[" + rmp2.professorName + "](" + rmp2.rmpURL + ")",
 				Color:       0x00ff00,
+				Footer: &discordgo.MessageEmbedFooter{
+					Text: "Data retreived from RateMyProfessors.com",
+				},
 				Fields: []*discordgo.MessageEmbedField{
 					{
 						Name:   "Best Overall Rating",
