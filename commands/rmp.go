@@ -112,7 +112,7 @@ func QueryProfessor(professor string) (RMPResult, error) {
 
 	// If no professors were found, return an error
 	if professorBody.SearchResultsTotal == 0 {
-		return result, errors.New("Professor not found")
+		return result, errors.New("professor not found")
 	}
 
 	fmt.Println("Found ", professorBody.SearchResultsTotal, " results")
@@ -159,6 +159,18 @@ func QueryProfessor(professor string) (RMPResult, error) {
 	})
 
 	c.Visit(scrapeURL)
+
+	if (result.topTags == nil) || (result.topTags[0] == "") || len(result.topTags) == 0 {
+		result.topTags = []string{"No tags"}
+	}
+
+	if result.wouldTakeAgain == "" {
+		result.wouldTakeAgain = "N/A"
+	}
+
+	if result.levelOfDifficulty == "" {
+		result.levelOfDifficulty = "N/A"
+	}
 
 	// Pagination variables
 	var page int = 1
