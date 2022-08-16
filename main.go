@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 	"os/signal"
@@ -15,22 +16,31 @@ const prefix = "!"
 
 // Variables used for command line params
 var (
-	Token string
+	Token     string
+	tokenFile string
 )
 
 // Parse arguments
 func init() {
 	// Accept the Discord bot token from the command line
-	// flag.StringVar(&Token, "t", "", "Bot Token")
-	// flag.Parse()
+	debugMode := flag.Bool("d", false, "Debug mode")
+	flag.Parse()
+
+	if debugMode != nil && *debugMode {
+		fmt.Println("Debug mode enabled")
+		tokenFile = "debug.env"
+	} else {
+		tokenFile = "token.env"
+	}
 
 	// Load the .env file
-	err := godotenv.Load("token.env")
+	err := godotenv.Load(tokenFile)
 	if err != nil {
 		fmt.Println("Error loading .env file")
 		panic(err)
 	}
 	Token = os.Getenv("TOKEN")
+
 }
 
 // Handles any message being created in the guild, parses them,
