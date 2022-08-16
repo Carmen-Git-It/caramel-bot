@@ -55,22 +55,22 @@ func CommandRMPCompare(dg *discordgo.Session, i *discordgo.InteractionCreate) {
 				Color:       0x00ff00,
 				Fields: []*discordgo.MessageEmbedField{
 					{
-						Name:   "Overall Rating",
+						Name:   "Best Overall Rating",
 						Value:  CompareOverallRating(rmp1, rmp2),
 						Inline: false,
 					},
 					{
-						Name:   "Would Take Again",
+						Name:   "Highest Would Take Again %",
 						Value:  CompareWouldTakeAgain(rmp1, rmp2),
 						Inline: false,
 					},
 					{
-						Name:   "Difficulty",
+						Name:   "Lowest Difficulty",
 						Value:  CompareDifficulty(rmp1, rmp2),
 						Inline: false,
 					},
 					{
-						Name:   "Best by Course",
+						Name:   "Best Rating by Course",
 						Value:  CompareBestByCourse(rmp1, rmp2),
 						Inline: false,
 					},
