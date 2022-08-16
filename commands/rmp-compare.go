@@ -51,7 +51,7 @@ func CommandRMPCompare(dg *discordgo.Session, i *discordgo.InteractionCreate) {
 			// Have both professors data, now compare them
 			embed := &discordgo.MessageEmbed{
 				Title:       "RateMyProfessor Comparison",
-				Description: rmp1.professorName + " vs " + rmp2.professorName,
+				Description: "[" + rmp1.professorName + "](" + rmp1.rmpURL + ")" + " vs " + "[" + rmp2.professorName + "](" + rmp2.rmpURL + ")",
 				Color:       0x00ff00,
 				Fields: []*discordgo.MessageEmbedField{
 					{

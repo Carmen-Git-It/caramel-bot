@@ -84,6 +84,7 @@ type RMPResult struct {
 	levelOfDifficulty   string
 	ratingDistribution  map[int]int
 	topTags             []string
+	rmpURL              string
 }
 
 func QueryProfessor(professor string) (RMPResult, error) {
@@ -122,6 +123,8 @@ func QueryProfessor(professor string) (RMPResult, error) {
 
 	var profId int = professorBody.Professors[0].TId
 	var scrapeURL string = fmt.Sprint("https://www.ratemyprofessors.com/ShowRatings.jsp?tid=", profId)
+
+	result.rmpURL = scrapeURL
 
 	// Create web scraper
 	c := colly.NewCollector(

@@ -43,8 +43,8 @@ func CommandRMP(dg *discordgo.Session, i *discordgo.InteractionCreate) {
 			fmt.Println("Top tags: ", rmp.topTags)
 
 			embed := &discordgo.MessageEmbed{
-				Author: &discordgo.MessageEmbedAuthor{},
-				Color:  0x00ff00,
+				Color:       0x00ff00,
+				Description: "[View profile on RateMyProfessors.com](" + rmp.rmpURL + ")",
 				Fields: []*discordgo.MessageEmbedField{
 					{
 						Name:   "Overall rating",
