@@ -13,12 +13,14 @@ func CommandRMPCompare(dg *discordgo.Session, i *discordgo.InteractionCreate) {
 	if options[0] != nil && options[1] != nil {
 		rmp1, err := QueryProfessor(options[0].StringValue())
 		if err != nil {
-			fmt.Println("Error querying the professor given, please try another professor name")
+			fmt.Println("Error querying professor" + options[0].StringValue())
 			fmt.Println(err)
-			var message = "**ERROR**: Professor not found, please try again."
+			var message = "Could not find professor \"" + options[0].StringValue() + "\", please try again."
+			// Make errors visible only to the one using the command
 			err = dg.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
+					Flags:   1 << 6, // Ephemeral
 					Content: message,
 				},
 			})
@@ -31,12 +33,13 @@ func CommandRMPCompare(dg *discordgo.Session, i *discordgo.InteractionCreate) {
 		} else {
 			rmp2, err := QueryProfessor(options[1].StringValue())
 			if err != nil {
-				fmt.Println("Error querying the professor given, please try another professor name")
+				fmt.Println("Error querying professor" + options[1].StringValue())
 				fmt.Println(err)
-				var message = "**ERROR**: Professor not found, please try again."
+				var message = "Could not find professor \"" + options[1].StringValue() + "\", please try again."
 				err = dg.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 					Type: discordgo.InteractionResponseChannelMessageWithSource,
 					Data: &discordgo.InteractionResponseData{
+						Flags:   1 << 6, // Ephemeral
 						Content: message,
 					},
 				})

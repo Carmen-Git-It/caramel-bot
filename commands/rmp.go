@@ -251,6 +251,11 @@ func CompareOverallRating(rmp1, rmp2 RMPResult) string {
 }
 
 func CompareWouldTakeAgain(rmp1, rmp2 RMPResult) string {
+	if (rmp1.wouldTakeAgain == "N/A") && (rmp2.wouldTakeAgain != "N/A") {
+		return rmp2.professorName + " has " + rmp2.wouldTakeAgain + " who would take again"
+	} else if (rmp1.wouldTakeAgain != "N/A") && (rmp2.wouldTakeAgain == "N/A") {
+		return rmp1.professorName + " has " + rmp1.wouldTakeAgain + " who would take again"
+	}
 	if rmp1.wouldTakeAgain > rmp2.wouldTakeAgain {
 		return rmp1.professorName + " has " + rmp1.wouldTakeAgain + " who would take again"
 	} else if rmp1.wouldTakeAgain < rmp2.wouldTakeAgain {
@@ -261,6 +266,11 @@ func CompareWouldTakeAgain(rmp1, rmp2 RMPResult) string {
 }
 
 func CompareDifficulty(rmp1, rmp2 RMPResult) string {
+	if (rmp1.levelOfDifficulty == "N/A") && (rmp2.levelOfDifficulty != "N/A") {
+		return rmp2.professorName + " has " + rmp2.levelOfDifficulty + " who would take again"
+	} else if (rmp1.levelOfDifficulty != "N/A") && (rmp2.levelOfDifficulty == "N/A") {
+		return rmp1.professorName + " has " + rmp1.levelOfDifficulty + " who would take again"
+	}
 	if rmp1.levelOfDifficulty < rmp2.levelOfDifficulty {
 		return rmp1.professorName + " has a level of difficulty of " + rmp1.levelOfDifficulty
 	} else if rmp1.levelOfDifficulty > rmp2.levelOfDifficulty {
