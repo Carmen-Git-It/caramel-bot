@@ -289,7 +289,7 @@ func CompareBestByCourse(rmp1, rmp2 RMPResult) string {
 			if rmp1.totalRatingByCourse[course] > rmp2.totalRatingByCourse[course] {
 				bestByCourse += fmt.Sprintf("%s%s%.2f%s%s%d%s", rmp1.professorName, " has a rating of ", rmp1.totalRatingByCourse[course], "/5\n", "with ", rmp1.numRatingsByCourse[course], " ratings\n")
 			} else if rmp1.totalRatingByCourse[course] < rmp2.totalRatingByCourse[course] {
-				bestByCourse += fmt.Sprintf("%s%s%.2f%s%s%d%s", rmp2.professorName, " has a rating of ", rmp1.totalRatingByCourse[course], "/5\n", "with ", rmp1.numRatingsByCourse[course], " ratings\n")
+				bestByCourse += fmt.Sprintf("%s%s%.2f%s%s%d%s", rmp2.professorName, " has a rating of ", rmp2.totalRatingByCourse[course], "/5\n", "with ", rmp2.numRatingsByCourse[course], " ratings\n")
 			} else {
 				bestByCourse += fmt.Sprintf("%s%.2f%s", "Both professors have a rating of ", rmp1.totalRatingByCourse[course], "/5\n")
 			}
