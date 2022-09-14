@@ -90,6 +90,10 @@ type RMPResult struct {
 func QueryProfessor(professor string) (RMPResult, error) {
 	var result RMPResult
 
+	if len(professor) == 0 {
+		return result, errors.New("Blank string is invalid for a professor name!")
+	}
+
 	var professorQuery string = fmt.Sprint("https://www.ratemyprofessors.com/filter/professor/?&page=1&filter=teacherlastname_sort_s+asc&query=", url.QueryEscape(professor), "&queryoption=TEACHER&queryBy=schoolId&sid=1497")
 	fmt.Println("Checking query: ", professorQuery)
 
