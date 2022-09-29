@@ -24,6 +24,18 @@ var Commands = []*discordgo.ApplicationCommand{
 		},
 	},
 	{
+		Name:        "insult",
+		Description: "Give another user an insult",
+		Options: []*discordgo.ApplicationCommandOption{
+			{
+				Name:        "user",
+				Description: "The user you would like to insult",
+				Type:        discordgo.ApplicationCommandOptionUser,
+				Required:    true,
+			},
+		},
+	},
+	{
 		Name:        "bitch",
 		Description: "Call another user a bitch",
 		Options: []*discordgo.ApplicationCommandOption{
@@ -72,6 +84,7 @@ var CommandHandlers = map[string]func(dg *discordgo.Session, i *discordgo.Intera
 	"bitch":       c.CommandBitch,
 	"rmp":         c.CommandRMP,
 	"rmp-compare": c.CommandRMPCompare,
+	"insult":      c.CommandInsult,
 }
 
 func addHandlers(dg *discordgo.Session, i *discordgo.InteractionCreate) {
