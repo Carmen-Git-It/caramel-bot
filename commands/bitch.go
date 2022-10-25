@@ -25,7 +25,6 @@ func CommandBitch(dg *discordgo.Session, i *discordgo.InteractionCreate) {
 			Content: message,
 		},
 	})
-	fmt.Println("CommandBitch") // __AUTO_GENERATED_PRINTF__
 
 	if err != nil {
 		fmt.Println("Error with function bitch:")
