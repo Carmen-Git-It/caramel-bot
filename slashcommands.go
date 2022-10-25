@@ -65,6 +65,22 @@ var Commands = []*discordgo.ApplicationCommand{
 			},
 		},
 	},
+	{
+		Name:        "interview",
+		Description: "a poll to keep track of the number of people that received interviews",
+		Options: []*discordgo.ApplicationCommandOption{
+			{
+				Type:         discordgo.ApplicationCommandOptionInteger,
+				Name:         "vote",
+				Description:  "vote for how many interviews you have received so far",
+				Required:     false,
+				Options:      []*discordgo.ApplicationCommandOption{},
+				Autocomplete: false,
+				MinValue:     new(float64),
+				MaxValue:     10,
+			},
+		},
+	},
 }
 
 var CommandHandlers = map[string]func(dg *discordgo.Session, i *discordgo.InteractionCreate){
@@ -72,6 +88,7 @@ var CommandHandlers = map[string]func(dg *discordgo.Session, i *discordgo.Intera
 	"bitch":       c.CommandBitch,
 	"rmp":         c.CommandRMP,
 	"rmp-compare": c.CommandRMPCompare,
+	"interview":   c.CommandInterview,
 }
 
 func addHandlers(dg *discordgo.Session, i *discordgo.InteractionCreate) {

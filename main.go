@@ -34,12 +34,16 @@ func init() {
 	}
 
 	// Load the .env file
-	err := godotenv.Load(tokenFile)
-	if err != nil {
-		fmt.Println("Error loading .env file")
-		panic(err)
-	}
+	godotenv.Load(tokenFile)
+	// if err != nil {
+	// fmt.Println("Error loading .env file")
+	// // do not panic here. Enviroments like github does not necessarily include a .env file
+	// // panic(err)
+	// }
 	Token = os.Getenv("TOKEN")
+	if Token == "" {
+		panic("No token found")
+	}
 
 }
 
@@ -65,7 +69,6 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 }
 
 func main() {
-
 	// Create a new discord session
 	dg, err := discordgo.New("Bot " + Token)
 	dg.AddHandler(addHandlers)
