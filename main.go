@@ -75,7 +75,8 @@ func main() {
 	}
 
 	// Add a callback for MessageCreate events.
-	dg.AddHandler(messageCreate)
+	// No longer need this for slash commands
+	// dg.AddHandler(messageCreate)
 
 	// Only cares about receiving message events.
 	dg.Identify.Intents = discordgo.IntentsGuildMessages
