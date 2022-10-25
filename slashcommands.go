@@ -77,32 +77,32 @@ var CommandHandlers = map[string]func(dg *discordgo.Session, i *discordgo.Intera
 // array containing handlers for handling components
 var ComponentsHandlers = map[string]func(dg *discordgo.Session, i *discordgo.InteractionCreate){}
 
-func addHandlers(dg *discordgo.Session, i *discordgo.InteractionCreate) {
-	dg.AddHandler(func(dg *discordgo.Session, i *discordgo.InteractionCreate) {
-		switch i.Type {
-		case discordgo.InteractionApplicationCommand:
-			if handler, ok := CommandHandlers[i.ApplicationCommandData().Name]; ok {
-				handler(dg, i)
-			} else {
-				fmt.Println("Error adding command handler")
-			}
-		case discordgo.InteractionMessageComponent:
-			if h, ok := ComponentsHandlers[i.MessageComponentData().CustomID]; ok {
-				h(dg, i)
-			} else {
-				fmt.Println("Error adding component handler")
-			}
-		}
-	})
+// func addHandlers(dg *discordgo.Session, i *discordgo.InteractionCreate) {
+// dg.AddHandler(func(dg *discordgo.Session, i *discordgo.InteractionCreate) {
+// switch i.Type {
+// case discordgo.InteractionApplicationCommand:
+// if handler, ok := CommandHandlers[i.ApplicationCommandData().Name]; ok {
+// handler(dg, i)
+// } else {
+// fmt.Println("Error adding command handler")
+// }
+// case discordgo.InteractionMessageComponent:
+// if h, ok := ComponentsHandlers[i.MessageComponentData().CustomID]; ok {
+// h(dg, i)
+// } else {
+// fmt.Println("Error adding component handler")
+// }
+// }
+// })
 
-	// dg.AddHandler(func(dg *discordgo.Session, i *discordgo.InteractionCreate) {
-	// if handler, ok := CommandHandlers[i.ApplicationCommandData().Name]; ok {
-	// handler(dg, i)
-	// } else {
-	// fmt.Println("Error adding handler")
-	// }
-	// })
-}
+// // dg.AddHandler(func(dg *discordgo.Session, i *discordgo.InteractionCreate) {
+// // if handler, ok := CommandHandlers[i.ApplicationCommandData().Name]; ok {
+// // handler(dg, i)
+// // } else {
+// // fmt.Println("Error adding handler")
+// // }
+// // })
+// }
 
 func registerCommands(dg *discordgo.Session) {
 	fmt.Println("Registering commands...")
@@ -129,14 +129,4 @@ func removeCommands(dg *discordgo.Session) {
 			}
 		}
 	}
-}
-
-// ParseUserOptions parses the user option passed to a command, and returns a map of data options
-func ParseUserOptions(sess *discordgo.Session, i *discordgo.InteractionCreate) map[string]*discordgo.ApplicationCommandInteractionDataOption {
-	options := i.ApplicationCommandData().Options
-	optionMap := make(map[string]*discordgo.ApplicationCommandInteractionDataOption, len(options))
-	for _, opt := range options {
-		optionMap[opt.Name] = opt
-	}
-	return optionMap
 }

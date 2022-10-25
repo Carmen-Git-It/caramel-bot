@@ -72,7 +72,24 @@ func main() {
 		fmt.Println("Error creating new discord session, ", err)
 		panic(err)
 	}
-	dg.AddHandler(addHandlers)
+
+	dg.AddHandler(func(dg *discordgo.Session, i *discordgo.InteractionCreate) {
+		switch i.Type {
+		case discordgo.InteractionApplicationCommand:
+			if handler, ok := CommandHandlers[i.ApplicationCommandData().Name]; ok {
+				handler(dg, i)
+			} else {
+				fmt.Println("Error adding command handler")
+			}
+		case discordgo.InteractionMessageComponent:
+			if h, ok := ComponentsHandlers[i.MessageComponentData().CustomID]; ok {
+				h(dg, i)
+			} else {
+				fmt.Println("Error adding component handler")
+			}
+		}
+	})
+	// dg.AddHandler(addHandlers)
 
 	// Add a callback for MessageCreate events.
 	// No longer need this for slash commands
