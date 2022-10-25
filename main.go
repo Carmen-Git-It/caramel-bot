@@ -71,14 +71,32 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 func main() {
 	// Create a new discord session
 	dg, err := discordgo.New("Bot " + Token)
-	dg.AddHandler(addHandlers)
 	if err != nil {
 		fmt.Println("Error creating new discord session, ", err)
 		panic(err)
 	}
 
+	dg.AddHandler(func(dg *discordgo.Session, i *discordgo.InteractionCreate) {
+		switch i.Type {
+		case discordgo.InteractionApplicationCommand:
+			if handler, ok := CommandHandlers[i.ApplicationCommandData().Name]; ok {
+				handler(dg, i)
+			} else {
+				fmt.Println("Error adding command handler")
+			}
+		case discordgo.InteractionMessageComponent:
+			if h, ok := ComponentsHandlers[i.MessageComponentData().CustomID]; ok {
+				h(dg, i)
+			} else {
+				fmt.Println("Error adding component handler")
+			}
+		}
+	})
+	// dg.AddHandler(addHandlers)
+
 	// Add a callback for MessageCreate events.
-	dg.AddHandler(messageCreate)
+	// No longer need this for slash commands
+	// dg.AddHandler(messageCreate)
 
 	// Only cares about receiving message events.
 	dg.Identify.Intents = discordgo.IntentsGuildMessages

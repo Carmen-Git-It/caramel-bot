@@ -91,15 +91,35 @@ var CommandHandlers = map[string]func(dg *discordgo.Session, i *discordgo.Intera
 	"interview":   c.CommandInterview,
 }
 
-func addHandlers(dg *discordgo.Session, i *discordgo.InteractionCreate) {
-	dg.AddHandler(func(dg *discordgo.Session, i *discordgo.InteractionCreate) {
-		if handler, ok := CommandHandlers[i.ApplicationCommandData().Name]; ok {
-			handler(dg, i)
-		} else {
-			fmt.Println("Error adding handler")
-		}
-	})
-}
+// array containing handlers for handling components
+var ComponentsHandlers = map[string]func(dg *discordgo.Session, i *discordgo.InteractionCreate){}
+
+// func addHandlers(dg *discordgo.Session, i *discordgo.InteractionCreate) {
+// dg.AddHandler(func(dg *discordgo.Session, i *discordgo.InteractionCreate) {
+// switch i.Type {
+// case discordgo.InteractionApplicationCommand:
+// if handler, ok := CommandHandlers[i.ApplicationCommandData().Name]; ok {
+// handler(dg, i)
+// } else {
+// fmt.Println("Error adding command handler")
+// }
+// case discordgo.InteractionMessageComponent:
+// if h, ok := ComponentsHandlers[i.MessageComponentData().CustomID]; ok {
+// h(dg, i)
+// } else {
+// fmt.Println("Error adding component handler")
+// }
+// }
+// })
+
+// // dg.AddHandler(func(dg *discordgo.Session, i *discordgo.InteractionCreate) {
+// // if handler, ok := CommandHandlers[i.ApplicationCommandData().Name]; ok {
+// // handler(dg, i)
+// // } else {
+// // fmt.Println("Error adding handler")
+// // }
+// // })
+// }
 
 func registerCommands(dg *discordgo.Session) {
 	fmt.Println("Registering commands...")
