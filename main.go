@@ -68,11 +68,11 @@ func main() {
 
 	// Create a new discord session
 	dg, err := discordgo.New("Bot " + Token)
-	dg.AddHandler(addHandlers)
 	if err != nil {
 		fmt.Println("Error creating new discord session, ", err)
 		panic(err)
 	}
+	dg.AddHandler(addHandlers)
 
 	// Add a callback for MessageCreate events.
 	// No longer need this for slash commands
