@@ -29,19 +29,18 @@ const DBLabel = "interviewVotes"
 type VotesContainer = map[int][]discordgo.User
 
 func CommandInterview(dg *discordgo.Session, i *discordgo.InteractionCreate) {
-	options := ParseUserOptions(dg, i)
 	db := openDB()
 	defer db.Close()
 
 	votes := getVotesFromDB(db)
-	fmt.Printf("CommandInterview votes: %v\n", votes) // __AUTO_GENERATED_PRINT_VAR__
+	// fmt.Printf("CommandInterview votes: %v\n", votes) // __AUTO_GENERATED_PRINT_VAR__
 
+	options := ParseUserOptions(dg, i)
 	vote := options["vote"].IntValue()
+	votes = removeUserVotes(votes, *i.Member.User)
 	votes = addVote(votes, int(vote), *i.Member.User)
-	fmt.Printf("CommandInterview votes: %v\n", votes) // __AUTO_GENERATED_PRINT_VAR__
-
+	fmt.Printf("CommandInterview votes: %+v\n", votes) // __AUTO_GENERATED_PRINT_VAR__
 	err := saveVote(db, votes)
-	fmt.Printf("CommandInterview err: %v\n", err) // __AUTO_GENERATED_PRINT_VAR__
 	if err == badger.ErrConflict {
 		panic(err)
 	}
@@ -56,7 +55,10 @@ func CommandInterview(dg *discordgo.Session, i *discordgo.InteractionCreate) {
 
 // openDB opens a connection to the local database
 func openDB() *badger.DB {
-	db, err := badger.Open(badger.DefaultOptions("./db"))
+	opts := badger.DefaultOptions("./db")
+	opts.Logger = nil
+
+	db, err := badger.Open(opts)
 	if err != nil {
 		panic(err)
 	}
@@ -98,6 +100,27 @@ func getVotesFromDB(db *badger.DB) VotesContainer {
 func addVote(votes VotesContainer, newVote int, user discordgo.User) VotesContainer {
 	votes[newVote] = append(votes[newVote], user)
 	return votes
+}
+
+// removeUserVotes removes all of a user's votes
+// votes  : the votes container
+// user   : the user's votes to remove
+// returns: the updated votes container
+func removeUserVotes(votes VotesContainer, user discordgo.User) VotesContainer {
+	filteredContainer := make(VotesContainer)
+	for voteCount, vote := range votes {
+		for _, u := range vote {
+			// add the users that are not the user we are removing
+			if u.ID != user.ID {
+				filteredContainer[voteCount] = append(filteredContainer[voteCount], u)
+			}
+		}
+	}
+	return filteredContainer
+}
+
+func removeIndex(s []discordgo.User, index int) []discordgo.User {
+	return append(s[:index], s[index+1:]...)
 }
 
 // saveVote save the db to local disk
