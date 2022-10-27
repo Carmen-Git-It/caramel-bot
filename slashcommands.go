@@ -10,6 +10,7 @@ import (
 
 var registeredCommands []*discordgo.ApplicationCommand
 
+var minValue = float64(1)
 var Commands = []*discordgo.ApplicationCommand{
 	{
 		Name:        "compliment",
@@ -76,7 +77,7 @@ var Commands = []*discordgo.ApplicationCommand{
 				Required:     false,
 				Options:      []*discordgo.ApplicationCommandOption{},
 				Autocomplete: false,
-				MinValue:     new(float64),
+				MinValue:     &minValue,
 				MaxValue:     10,
 			},
 		},

@@ -19,3 +19,4 @@ digitaloceankey.pub
 digitaloceankey
 debug-keys
 tmp/
+db/
