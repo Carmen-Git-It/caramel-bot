@@ -80,6 +80,16 @@ var Commands = []*discordgo.ApplicationCommand{
 				MinValue:     &minValue,
 				MaxValue:     10,
 			},
+			{
+				Type:         discordgo.ApplicationCommandOptionBoolean,
+				Name:         "getvotes",
+				Description:  "view all votes",
+				ChannelTypes: []discordgo.ChannelType{},
+				Required:     false,
+				Options:      []*discordgo.ApplicationCommandOption{},
+				Autocomplete: false,
+				Choices:      []*discordgo.ApplicationCommandOptionChoice{},
+			},
 		},
 	},
 }

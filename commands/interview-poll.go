@@ -3,26 +3,15 @@ package commands
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
+	"strings"
 
 	"github.com/bwmarrin/discordgo"
 	badger "github.com/dgraph-io/badger/v3"
+	"github.com/olekukonko/tablewriter"
 )
 
-type State struct {
-	Votes struct {
-		One     discordgo.User `json:"1"`
-		Two     discordgo.User `json:"2"`
-		Three   discordgo.User `json:"3"`
-		Four    discordgo.User `json:"4"`
-		Five    discordgo.User `json:"5"`
-		Six     discordgo.User `json:"6"`
-		Seven   discordgo.User `json:"7"`
-		Eight   discordgo.User `json:"8"`
-		Nine    discordgo.User `json:"9"`
-		TenPlus discordgo.User `json:"10+"`
-	}
-}
-
+// the label of the db
 const DBLabel = "interviewVotes"
 
 // interview container type
@@ -36,21 +25,43 @@ func CommandInterview(dg *discordgo.Session, i *discordgo.InteractionCreate) {
 	// fmt.Printf("CommandInterview votes: %v\n", votes) // __AUTO_GENERATED_PRINT_VAR__
 
 	options := ParseUserOptions(dg, i)
-	vote := options["vote"].IntValue()
-	votes = removeUserVotes(votes, *i.Member.User)
-	votes = addVote(votes, int(vote), *i.Member.User)
-	fmt.Printf("CommandInterview votes: %+v\n", votes) // __AUTO_GENERATED_PRINT_VAR__
-	err := saveVote(db, votes)
-	if err == badger.ErrConflict {
-		panic(err)
-	}
+	fmt.Printf("CommandInterview options: %v\n", options) // __AUTO_GENERATED_PRINT_VAR__
+	if _, ok := options["vote"]; ok {
+		vote := options["vote"].IntValue()
 
-	dg.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseChannelMessageWithSource,
-		Data: &discordgo.InteractionResponseData{
-			Content: "hello",
-		},
-	})
+		votes = removeUserVotes(votes, *i.Member.User)
+		votes = addVote(votes, int(vote), *i.Member.User)
+		fmt.Printf("CommandInterview votes: %+v\n", votes) // __AUTO_GENERATED_PRINT_VAR__
+		err := saveVote(db, votes)
+		if err == badger.ErrConflict {
+			panic(err)
+		}
+
+		dg.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{
+				Content: "Vote recorded successfully",
+			},
+		})
+	} else if val, ok := options["getvotes"]; ok && val.BoolValue() {
+		votes := getVotesFromDB(db)
+		mess := formatVotes(votes)
+
+		dg.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{
+				Content: mess,
+			},
+		})
+	} else if val, ok := options["getvotes"]; ok && !val.BoolValue() {
+		dg.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{
+				Content: "Ok",
+				Flags:   uint64(discordgo.MessageFlagsEphemeral),
+			},
+		})
+	}
 }
 
 // openDB opens a connection to the local database
@@ -138,4 +149,30 @@ func saveVote(db *badger.DB, votes VotesContainer) error {
 		return err
 	})
 	return err
+}
+
+// formatVotes formats a container of votes as a discord message
+// votes: the votes to format
+// retturn: the formatted message
+func formatVotes(votes VotesContainer) string {
+	data := make([][]string, 0)
+	message := &strings.Builder{}
+	message.WriteString("```")
+	for idx, vote := range votes {
+		// string representation of the index
+		strIdx := strconv.Itoa(idx)
+		// string representation of the number of votes
+		strLen := strconv.Itoa(len(vote))
+		data = append(data, []string{strIdx, strLen})
+	}
+
+	table := tablewriter.NewWriter(message)
+	table.SetHeader([]string{"NO.Interviews", "Votes"})
+
+	for _, v := range data {
+		table.Append(v)
+	}
+	table.Render() // Send output
+	message.WriteString("```")
+	return message.String()
 }
