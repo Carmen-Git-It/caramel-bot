@@ -90,6 +90,16 @@ var Commands = []*discordgo.ApplicationCommand{
 				Autocomplete: false,
 				Choices:      []*discordgo.ApplicationCommandOptionChoice{},
 			},
+			{
+				Type:         discordgo.ApplicationCommandOptionBoolean,
+				Name:         "remove",
+				Description:  "remove your vote",
+				ChannelTypes: []discordgo.ChannelType{},
+				Required:     false,
+				Options:      []*discordgo.ApplicationCommandOption{},
+				Autocomplete: false,
+				Choices:      []*discordgo.ApplicationCommandOptionChoice{},
+			},
 		},
 	},
 }

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/bwmarrin/discordgo"
 	badger "github.com/dgraph-io/badger/v3"
@@ -21,18 +22,15 @@ func CommandInterview(dg *discordgo.Session, i *discordgo.InteractionCreate) {
 	db := openDB()
 	defer db.Close()
 
-	votes := getVotesFromDB(db)
-	// fmt.Printf("CommandInterview votes: %v\n", votes) // __AUTO_GENERATED_PRINT_VAR__
-
 	options := ParseUserOptions(dg, i)
-	fmt.Printf("CommandInterview options: %v\n", options) // __AUTO_GENERATED_PRINT_VAR__
 	if _, ok := options["vote"]; ok {
 		vote := options["vote"].IntValue()
 
+		votes := getVotesFromDB(db)
 		votes = removeUserVotes(votes, *i.Member.User)
 		votes = addVote(votes, int(vote), *i.Member.User)
 		fmt.Printf("CommandInterview votes: %+v\n", votes) // __AUTO_GENERATED_PRINT_VAR__
-		err := saveVote(db, votes)
+		err := saveVotes(db, votes)
 		if err == badger.ErrConflict {
 			panic(err)
 		}
@@ -60,6 +58,29 @@ func CommandInterview(dg *discordgo.Session, i *discordgo.InteractionCreate) {
 				Content: "Ok",
 				Flags:   uint64(discordgo.MessageFlagsEphemeral),
 			},
+		})
+	} else if _, ok := options["remove"]; ok {
+		votes := getVotesFromDB(db)
+		message := formatVotes(votes)
+		message += "\n\nRemoving your vote..."
+		dg.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{
+				Content: message,
+				Flags:   uint64(discordgo.MessageFlagsEphemeral),
+			},
+		})
+
+		votes = removeUserVotes(votes, *i.Member.User)
+		saveVotes(db, votes)
+
+		time.Sleep(3 * time.Second)
+
+		message = formatVotes(votes)
+		message += "\n\nYour vote has been removed"
+
+		dg.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
+			Content: message,
 		})
 	}
 }
@@ -134,11 +155,11 @@ func removeIndex(s []discordgo.User, index int) []discordgo.User {
 	return append(s[:index], s[index+1:]...)
 }
 
-// saveVote save the db to local disk
+// saveVotes save the db to local disk
 // db     : the db to save
 // votes  : the votes to save
 // returns: error if any
-func saveVote(db *badger.DB, votes VotesContainer) error {
+func saveVotes(db *badger.DB, votes VotesContainer) error {
 	err := db.Update(func(txn *badger.Txn) error {
 		j, err := json.Marshal(votes)
 		if err != nil {
