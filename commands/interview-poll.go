@@ -2,7 +2,6 @@ package commands
 
 import (
 	"encoding/json"
-	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -25,63 +24,91 @@ func CommandInterview(dg *discordgo.Session, i *discordgo.InteractionCreate) {
 	options := ParseUserOptions(dg, i)
 	if _, ok := options["vote"]; ok {
 		vote := options["vote"].IntValue()
-
 		votes := getVotesFromDB(db)
-		votes = removeUserVotes(votes, *i.Member.User)
-		votes = addVote(votes, int(vote), *i.Member.User)
-		fmt.Printf("CommandInterview votes: %+v\n", votes) // __AUTO_GENERATED_PRINT_VAR__
-		err := saveVotes(db, votes)
-		if err == badger.ErrConflict {
-			panic(err)
-		}
 
-		dg.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-			Type: discordgo.InteractionResponseChannelMessageWithSource,
-			Data: &discordgo.InteractionResponseData{
-				Content: "Vote recorded successfully",
-			},
-		})
-	} else if val, ok := options["getvotes"]; ok && val.BoolValue() {
-		votes := getVotesFromDB(db)
-		mess := formatVotes(votes)
+		mess := formatVotes(votes, "Recording your vote... It may take a few seconds")
 
 		dg.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 			Type: discordgo.InteractionResponseChannelMessageWithSource,
 			Data: &discordgo.InteractionResponseData{
 				Content: mess,
-			},
-		})
-	} else if val, ok := options["getvotes"]; ok && !val.BoolValue() {
-		dg.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-			Type: discordgo.InteractionResponseChannelMessageWithSource,
-			Data: &discordgo.InteractionResponseData{
-				Content: "Ok",
-				Flags:   uint64(discordgo.MessageFlagsEphemeral),
-			},
-		})
-	} else if _, ok := options["remove"]; ok {
-		votes := getVotesFromDB(db)
-		message := formatVotes(votes)
-		message += "\n\nRemoving your vote..."
-		dg.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-			Type: discordgo.InteractionResponseChannelMessageWithSource,
-			Data: &discordgo.InteractionResponseData{
-				Content: message,
-				Flags:   uint64(discordgo.MessageFlagsEphemeral),
+				Flags:   discordgo.MessageFlagsEphemeral,
 			},
 		})
 
-		votes = removeUserVotes(votes, *i.Member.User)
-		saveVotes(db, votes)
+		votes, _ = removeUserVotes(votes, *i.Member.User)
+		votes = addVote(votes, int(vote), *i.Member.User)
+		err := saveVotes(db, votes)
+		if err == badger.ErrConflict {
+			panic(err)
+		}
 
 		time.Sleep(3 * time.Second)
 
-		message = formatVotes(votes)
-		message += "\n\nYour vote has been removed"
-
+		mess = formatVotes(votes, "Your vote has been recorded successfully")
 		dg.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
-			Content: message,
+			Content: &mess,
 		})
+
+	} else if val, ok := options["getvotes"]; ok {
+		if val.BoolValue() {
+			votes := getVotesFromDB(db)
+			mess := formatVotes(votes, "")
+
+			dg.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+				Type: discordgo.InteractionResponseChannelMessageWithSource,
+				Data: &discordgo.InteractionResponseData{
+					Content: mess,
+				},
+			})
+		} else {
+			dg.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+				Type: discordgo.InteractionResponseChannelMessageWithSource,
+				Data: &discordgo.InteractionResponseData{
+					Content: "Ok",
+					Flags:   discordgo.MessageFlagsEphemeral,
+				},
+			})
+
+		}
+	} else if val, ok := options["remove"]; ok {
+		if val.BoolValue() {
+			votes := getVotesFromDB(db)
+			message := formatVotes(votes, "Removing your vote... This may take a few seconds")
+			dg.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+				Type: discordgo.InteractionResponseChannelMessageWithSource,
+				Data: &discordgo.InteractionResponseData{
+					Content: message,
+					Flags:   discordgo.MessageFlagsEphemeral,
+				},
+			})
+
+			votes, removed := removeUserVotes(votes, *i.Member.User)
+			saveVotes(db, votes)
+
+			time.Sleep(3 * time.Second)
+
+			// if a user's vote was removed, tell them their vote has been removed
+			if removed {
+				message = formatVotes(votes, "Your vote has been removed")
+				dg.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
+					Content: &message,
+				})
+			} else {
+				message = formatVotes(votes, "You have not voted")
+				dg.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
+					Content: &message,
+				})
+			}
+		} else {
+			dg.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+				Type: discordgo.InteractionResponseChannelMessageWithSource,
+				Data: &discordgo.InteractionResponseData{
+					Content: "Ok",
+					Flags:   discordgo.MessageFlagsEphemeral,
+				},
+			})
+		}
 	}
 }
 
@@ -138,17 +165,22 @@ func addVote(votes VotesContainer, newVote int, user discordgo.User) VotesContai
 // votes  : the votes container
 // user   : the user's votes to remove
 // returns: the updated votes container
-func removeUserVotes(votes VotesContainer, user discordgo.User) VotesContainer {
+func removeUserVotes(votes VotesContainer, user discordgo.User) (VotesContainer, bool) {
 	filteredContainer := make(VotesContainer)
+	// if we encountered the user we are removing
+	found := false
 	for voteCount, vote := range votes {
 		for _, u := range vote {
 			// add the users that are not the user we are removing
 			if u.ID != user.ID {
 				filteredContainer[voteCount] = append(filteredContainer[voteCount], u)
+			} else {
+				// keep track of we've encountered the user we are removing
+				found = true
 			}
 		}
 	}
-	return filteredContainer
+	return filteredContainer, found
 }
 
 func removeIndex(s []discordgo.User, index int) []discordgo.User {
@@ -174,11 +206,12 @@ func saveVotes(db *badger.DB, votes VotesContainer) error {
 
 // formatVotes formats a container of votes as a discord message
 // votes: the votes to format
+// message: a message to append to the end of the vote tally
 // retturn: the formatted message
-func formatVotes(votes VotesContainer) string {
+func formatVotes(votes VotesContainer, message string) string {
 	data := make([][]string, 0)
-	message := &strings.Builder{}
-	message.WriteString("```")
+	mess := &strings.Builder{}
+	mess.WriteString("```")
 	for idx, vote := range votes {
 		// string representation of the index
 		strIdx := strconv.Itoa(idx)
@@ -187,13 +220,14 @@ func formatVotes(votes VotesContainer) string {
 		data = append(data, []string{strIdx, strLen})
 	}
 
-	table := tablewriter.NewWriter(message)
+	table := tablewriter.NewWriter(mess)
 	table.SetHeader([]string{"NO.Interviews", "Votes"})
 
 	for _, v := range data {
 		table.Append(v)
 	}
 	table.Render() // Send output
-	message.WriteString("```")
-	return message.String()
+	mess.WriteString("```")
+	mess.WriteString("\n\n" + message)
+	return mess.String()
 }

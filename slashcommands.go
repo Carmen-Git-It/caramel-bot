@@ -10,7 +10,7 @@ import (
 
 var registeredCommands []*discordgo.ApplicationCommand
 
-var minValue = float64(1)
+var minValue = float64(0)
 var Commands = []*discordgo.ApplicationCommand{
 	{
 		Name:        "compliment",
