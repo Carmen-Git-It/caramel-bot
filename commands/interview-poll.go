@@ -22,8 +22,9 @@ func CommandInterview(dg *discordgo.Session, i *discordgo.InteractionCreate) {
 	defer db.Close()
 
 	options := ParseUserOptions(dg, i)
-	if _, ok := options["vote"]; ok {
-		vote := options["vote"].IntValue()
+	// record a user vote
+	if val, ok := options["vote"]; ok {
+		vote := val.IntValue()
 		votes := getVotesFromDB(db)
 
 		mess := formatVotes(votes, "Recording your vote... It may take a few seconds")
@@ -51,6 +52,7 @@ func CommandInterview(dg *discordgo.Session, i *discordgo.InteractionCreate) {
 		})
 
 	} else if val, ok := options["getvotes"]; ok {
+		// return all user votes
 		if val.BoolValue() {
 			votes := getVotesFromDB(db)
 			mess := formatVotes(votes, "")
@@ -72,6 +74,7 @@ func CommandInterview(dg *discordgo.Session, i *discordgo.InteractionCreate) {
 
 		}
 	} else if val, ok := options["remove"]; ok {
+		// remove a user's votes
 		if val.BoolValue() {
 			votes := getVotesFromDB(db)
 			message := formatVotes(votes, "Removing your vote... This may take a few seconds")
@@ -95,7 +98,7 @@ func CommandInterview(dg *discordgo.Session, i *discordgo.InteractionCreate) {
 					Content: &message,
 				})
 			} else {
-				message = formatVotes(votes, "You have not voted")
+				message = formatVotes(votes, "You have not voted... Pls vote")
 				dg.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
 					Content: &message,
 				})
@@ -205,7 +208,7 @@ func saveVotes(db *badger.DB, votes VotesContainer) error {
 }
 
 // formatVotes formats a container of votes as a discord message
-// votes: the votes to format
+// votes  : the votes to format
 // message: a message to append to the end of the vote tally
 // retturn: the formatted message
 func formatVotes(votes VotesContainer, message string) string {
