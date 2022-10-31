@@ -104,6 +104,7 @@ func CommandInterview(dg *discordgo.Session, i *discordgo.InteractionCreate) {
 				})
 			}
 		} else {
+			// if not args is passed in
 			dg.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
@@ -112,6 +113,31 @@ func CommandInterview(dg *discordgo.Session, i *discordgo.InteractionCreate) {
 				},
 			})
 		}
+	} else {
+		dg.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{
+				Components: []discordgo.MessageComponent{},
+				Embeds: []*discordgo.MessageEmbed{
+					{
+						Type:        "",
+						Title:       "/interview",
+						Description: "A poll like command to store votes internally. Allowing people to vote for how many interviews they've received for co-op so far",
+						Timestamp:   "",
+						Color:       0,
+						Footer: &discordgo.MessageEmbedFooter{
+							Text: "Telemetry data sent to <@799157783307092008>",
+						},
+					},
+				},
+				AllowedMentions: &discordgo.MessageAllowedMentions{},
+				Files:           []*discordgo.File{},
+				Flags:           0,
+				Choices:         []*discordgo.ApplicationCommandOptionChoice{},
+				CustomID:        "",
+				Title:           "",
+			},
+		})
 	}
 }
 
