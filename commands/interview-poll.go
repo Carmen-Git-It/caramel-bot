@@ -120,11 +120,14 @@ func CommandInterview(dg *discordgo.Session, i *discordgo.InteractionCreate) {
 				Components: []discordgo.MessageComponent{},
 				Embeds: []*discordgo.MessageEmbed{
 					{
-						Type:        "",
-						Title:       "/interview",
-						Description: "A poll like command to store votes internally. Allowing people to vote for how many interviews they've received for co-op so far",
-						Timestamp:   "",
-						Color:       0,
+						Type:  "",
+						Title: "/interview",
+						Description: `A poll like command to store votes internally. Allowing people to vote for how many interviews they've received for co-op so far
+
+                  ` +
+							"`/interview vote:<number>` cast your vote\n`/interview getvotes:true` gets all votes\n`/interview remove:true` removes your vote",
+						Timestamp: "",
+						Color:     0,
 						Footer: &discordgo.MessageEmbedFooter{
 							Text: "Telemetry data sent to <@799157783307092008>",
 						},
